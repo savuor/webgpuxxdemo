@@ -1,0 +1,9 @@
+{
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${userHome}/builds/webgpuxxdemo/${buildType}/",
+    "cmake.installPrefix": "${userHome}/builds/webgpuxxdemo/${buildType}/install/",
+    // "cmake.configureSettings": {
+    //     "OpenCV_DIR" : "/home/savuor/builds/ocv/4.x/${buildType}/install/lib/cmake/opencv4",
+    //     "Open3D_DIR" : "/home/savuor/builds/Open3D/${buildType}/install/lib/cmake/Open3D",
+    // },
+}
