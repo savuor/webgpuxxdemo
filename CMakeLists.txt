@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.0...3.25)
 project( WebGpuDemo VERSION 0.1.0 LANGUAGES CXX C )
 
+add_subdirectory(3rdparty/glfw-3.3.8)
+
 add_executable(application app.cpp)
+
+target_link_libraries(application PRIVATE glfw)
 
 set_target_properties(application PROPERTIES
     CXX_STANDARD 17
@@ -14,7 +18,7 @@ else()
 endif()
 
 if(XCODE)
-    set_target_properties(App PROPERTIES
+    set_target_properties(application PROPERTIES
         XCODE_GENERATE_SCHEME ON
         XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE "Metal")
 endif()
