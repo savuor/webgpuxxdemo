@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.0...3.25)
+project( WebGpuDemo VERSION 0.1.0 LANGUAGES CXX C )
+
+add_executable(application app.cpp)
+
+set_target_properties(application PROPERTIES
+    CXX_STANDARD 17
+)
+
+if (MSVC)
+    target_compile_options(application PRIVATE /W4)
+else()
+    target_compile_options(application PRIVATE -Wall -Wextra -pedantic)
+endif()
+
+if(XCODE)
+    set_target_properties(App PROPERTIES
+        XCODE_GENERATE_SCHEME ON
+        XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE "Metal")
+endif()
