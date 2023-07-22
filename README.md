@@ -1,2 +1,3 @@
-# webgpuxxdemo
-WebGPU C++ Demo
+# WebGPU C++ Demo
+
+Experiments in the modern graphic API
