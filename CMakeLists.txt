@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.0...3.25)
 project( WebGpuDemo VERSION 0.1.0 LANGUAGES CXX C )
 
 add_subdirectory(3rdparty/glfw-3.3.8)
+add_subdirectory(3rdparty/dawn)
 
 add_executable(application app.cpp)
 
-target_link_libraries(application PRIVATE glfw)
+target_link_libraries(application PRIVATE glfw webgpu)
 
 set_target_properties(application PROPERTIES
     CXX_STANDARD 17
