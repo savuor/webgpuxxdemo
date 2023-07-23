@@ -1,5 +1,7 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
+#include <webgpu/webgpu.h>
+
 
 struct TerminatorGLFW
 {
@@ -8,6 +10,7 @@ struct TerminatorGLFW
         glfwTerminate();
     }
 };
+
 
 int main (int /* argc */, char** /* argv */)
 {
@@ -19,15 +22,25 @@ int main (int /* argc */, char** /* argv */)
 
     TerminatorGLFW terminatorGlfw;
 
-    // Create the window
     GLFWwindow* window = glfwCreateWindow(640, 480, "WebGPU C++ Demo", NULL, NULL);
 
     if (!window)
     {
         std::cerr << "Could not open window!" << std::endl;
-
         return 1;
     }
+
+    WGPUInstanceDescriptor desc = {};
+    desc.nextInChain = nullptr;
+    WGPUInstance instance = wgpuCreateInstance(&desc);
+    if (!instance)
+    {
+        std::cerr << "Could not initialize WebGPU!" << std::endl;
+        return 1;
+    }
+
+    // WGPUInstance is a simple pointer, it may be copied around without worrying about its size
+    std::cout << "WGPU instance: " << instance << std::endl;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -36,7 +49,8 @@ int main (int /* argc */, char** /* argv */)
         glfwPollEvents();
     }
 
-    // At the end of the program, destroy the window
+    wgpuInstanceRelease(instance);
+
     glfwDestroyWindow(window);
 
     return 0;
