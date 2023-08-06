@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <webgpu/webgpu.h>
+#include <glfw3webgpu.h>
 
 #define WEBGPU_BACKEND_DAWN
 
@@ -64,6 +65,7 @@ int main (int /* argc */, char** /* argv */)
 
     TerminatorGLFW terminatorGlfw;
 
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* window = glfwCreateWindow(640, 480, "WebGPU C++ Demo", NULL, NULL);
 
     if (!window)
@@ -102,12 +104,16 @@ int main (int /* argc */, char** /* argv */)
         std::cout << " - " << f << std::endl;
     }
 
+    WGPUSurface surface = glfwGetWGPUSurface(instance, window);
+
     while (!glfwWindowShouldClose(window))
     {
         // Check whether the user clicked on the close button (and any other
         // mouse/key event, which we don't use so far)
         glfwPollEvents();
     }
+
+    wgpuSurfaceRelease(surface);
 
     wgpuAdapterRelease(adapter);
 
