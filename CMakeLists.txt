@@ -3,10 +3,11 @@ project( WebGpuDemo VERSION 0.1.0 LANGUAGES CXX C )
 
 add_subdirectory(3rdparty/glfw-3.3.8)
 add_subdirectory(3rdparty/dawn)
+add_subdirectory(3rdparty/glfw3webgpu)
 
 add_executable(application app.cpp)
 
-target_link_libraries(application PRIVATE glfw webgpu)
+target_link_libraries(application PRIVATE glfw webgpu glfw3webgpu)
 
 set_target_properties(application PROPERTIES
     CXX_STANDARD 17
