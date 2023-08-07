@@ -158,6 +158,19 @@ int main (int /* argc */, char** /* argv */)
         std::cout << std::endl;
     };
     wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
+
+    auto onDeviceLost = [](WGPUDeviceLostReason reason, char const * message, void * /*userdata*/)
+    {
+        std::cout << "Device is lost: reason " << reason;
+        if (message)
+        {
+            std::cout << " (" << message << ")";
+        }
+        std::cout << std::endl;
+    };
+
+    wgpuDeviceSetDeviceLostCallback(device, onDeviceLost, nullptr /*pUserData*/ );
+
     WGPUQueue queue = wgpuDeviceGetQueue(device);
 
     auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void* /* pUserData */)
