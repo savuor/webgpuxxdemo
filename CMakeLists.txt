@@ -9,9 +9,9 @@ add_executable(application app.cpp)
 
 target_link_libraries(application PRIVATE glfw webgpu glfw3webgpu)
 
-set_target_properties(application PROPERTIES
-    CXX_STANDARD 17
-)
+set_target_properties(application PROPERTIES CXX_STANDARD 17 )
+
+set_target_properties(application PROPERTIES VS_DEBUGGER_ENVIRONMENT "DAWN_DEBUG_BREAK_ON_ERROR=1")
 
 if (MSVC)
     target_compile_options(application PRIVATE /W4)
