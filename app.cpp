@@ -5,7 +5,8 @@
 #include <webgpu/webgpu.h>
 #include <glfw3webgpu.h>
 
-#define WEBGPU_BACKEND_DAWN
+// redefined, commenting it out
+//#define WEBGPU_BACKEND_DAWN
 
 struct TerminatorGLFW
 {
@@ -157,6 +158,30 @@ int main (int /* argc */, char** /* argv */)
         std::cout << std::endl;
     };
     wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
+    WGPUQueue queue = wgpuDeviceGetQueue(device);
+
+    auto onQueueWorkDone = [](WGPUQueueWorkDoneStatus status, void* /* pUserData */)
+    {
+        std::cout << "Queued work finished with status: " << status << std::endl;
+    };
+    wgpuQueueOnSubmittedWorkDone(queue, /* signalValue -- no idea what it is */ 0, onQueueWorkDone, nullptr /* pUserData */);
+
+    WGPUCommandEncoderDescriptor encoderDesc = {};
+    encoderDesc.nextInChain = nullptr;
+    encoderDesc.label = "My command encoder";
+    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
+
+    wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
+    wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
+
+    WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
+    cmdBufferDescriptor.nextInChain = nullptr;
+    cmdBufferDescriptor.label = "Command buffer";
+    WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
+
+    // Finally submit the command queue
+    std::cout << "Submitting command..." << std::endl;
+    wgpuQueueSubmit(queue, 1, &command);
 
     WGPUSurface surface = glfwGetWGPUSurface(instance, window);
 
@@ -168,6 +193,12 @@ int main (int /* argc */, char** /* argv */)
     }
 
     wgpuSurfaceRelease(surface);
+
+    wgpuCommandBufferRelease(command);
+
+    wgpuCommandEncoderRelease(encoder);
+
+    wgpuQueueRelease(queue);
 
     wgpuDeviceRelease(device);
 
