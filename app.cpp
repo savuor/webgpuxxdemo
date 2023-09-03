@@ -90,6 +90,18 @@ WGPUDevice requestDevice(WGPUAdapter adapter, WGPUDeviceDescriptor const * descr
 
 int main (int /* argc */, char** /* argv */)
 {
+    WGPUInstanceDescriptor desc = {};
+    desc.nextInChain = nullptr;
+    WGPUInstance instance = wgpuCreateInstance(&desc);
+    if (!instance)
+    {
+        std::cerr << "Could not initialize WebGPU!" << std::endl;
+        return 1;
+    }
+
+    // WGPUInstance is a simple pointer, it may be copied around without worrying about its size
+    std::cout << "WGPU instance: " << instance << std::endl;
+
     if (!glfwInit())
     {
         std::cerr << "Could not initialize GLFW!" << std::endl;
@@ -108,17 +120,7 @@ int main (int /* argc */, char** /* argv */)
         return 1;
     }
 
-    WGPUInstanceDescriptor desc = {};
-    desc.nextInChain = nullptr;
-    WGPUInstance instance = wgpuCreateInstance(&desc);
-    if (!instance)
-    {
-        std::cerr << "Could not initialize WebGPU!" << std::endl;
-        return 1;
-    }
-
-    // WGPUInstance is a simple pointer, it may be copied around without worrying about its size
-    std::cout << "WGPU instance: " << instance << std::endl;
+    WGPUSurface surface = glfwGetWGPUSurface(instance, window);
 
     WGPURequestAdapterOptions adapterOpts = {};
     WGPUAdapter adapter = requestAdapter(instance, &adapterOpts);
@@ -180,37 +182,76 @@ int main (int /* argc */, char** /* argv */)
     };
     wgpuQueueOnSubmittedWorkDone(queue, /* signalValue -- no idea what it is */ 0, onQueueWorkDone, nullptr /* pUserData */);
 
-    WGPUCommandEncoderDescriptor encoderDesc = {};
-    encoderDesc.nextInChain = nullptr;
-    encoderDesc.label = "My command encoder";
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
 
-    wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
-    wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
-
-    WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
-    cmdBufferDescriptor.nextInChain = nullptr;
-    cmdBufferDescriptor.label = "Command buffer";
-    WGPUCommandBuffer command = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
-
-    // Finally submit the command queue
-    std::cout << "Submitting command..." << std::endl;
-    wgpuQueueSubmit(queue, 1, &command);
-
-    WGPUSurface surface = glfwGetWGPUSurface(instance, window);
+    WGPUSwapChainDescriptor swapChainDesc = {};
+    swapChainDesc.nextInChain = nullptr;
+    swapChainDesc.width = 640;
+    swapChainDesc.height = 480;
+    swapChainDesc.format = WGPUTextureFormat_BGRA8Unorm;
+    swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
+    swapChainDesc.presentMode = WGPUPresentMode_Fifo;
+    swapChainDesc.label = "Our swap chain";
+    WGPUSwapChain swapChain = wgpuDeviceCreateSwapChain(device, surface, &swapChainDesc);
+    std::cout << "Swapchain: " << swapChain << std::endl;
 
     while (!glfwWindowShouldClose(window))
     {
         // Check whether the user clicked on the close button (and any other
         // mouse/key event, which we don't use so far)
         glfwPollEvents();
+
+        WGPUTextureView nextTexture = wgpuSwapChainGetCurrentTextureView(swapChain);
+        std::cout << "nextTexture: " << nextTexture << std::endl;
+        if (!nextTexture)
+        {
+            std::cerr << "Cannot acquire next swap chain texture" << std::endl;
+            break;
+        }
+
+        WGPUCommandEncoderDescriptor encoderDesc = {};
+        encoderDesc.nextInChain = nullptr;
+        encoderDesc.label = "My command encoder";
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, &encoderDesc);
+
+        //wgpuCommandEncoderInsertDebugMarker(encoder, "Do one thing");
+        //wgpuCommandEncoderInsertDebugMarker(encoder, "Do another thing");
+
+        WGPURenderPassDescriptor renderPassDesc = {};
+
+        WGPURenderPassColorAttachment renderPassColorAttachment = {};
+        renderPassColorAttachment.view = nextTexture;
+        renderPassColorAttachment.resolveTarget = nullptr;
+        renderPassColorAttachment.loadOp = WGPULoadOp_Clear;
+        renderPassColorAttachment.storeOp = WGPUStoreOp_Store;
+        renderPassColorAttachment.clearValue = WGPUColor{ 0.9, 0.1, 0.2, 1.0 };
+
+        renderPassDesc.colorAttachmentCount = 1;
+        renderPassDesc.colorAttachments = &renderPassColorAttachment;
+        renderPassDesc.depthStencilAttachment = nullptr;
+        renderPassDesc.timestampWriteCount = 0;
+        renderPassDesc.timestampWrites = nullptr;
+        renderPassDesc.nextInChain = nullptr;
+        
+        WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
+        wgpuRenderPassEncoderEnd(renderPass);
+
+        wgpuTextureViewRelease(nextTexture);
+
+        WGPUCommandBufferDescriptor cmdBufferDescriptor = {};
+        cmdBufferDescriptor.nextInChain = nullptr;
+        cmdBufferDescriptor.label = "Command buffer";
+        WGPUCommandBuffer commandBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDescriptor);
+        wgpuQueueSubmit(queue, 1, &commandBuffer);
+
+        //wgpuCommandBufferRelease(commandBuffer);
+        //wgpuCommandEncoderRelease(encoder);
+
+        wgpuSwapChainPresent(swapChain);
     }
 
+    wgpuSwapChainRelease(swapChain);
+
     wgpuSurfaceRelease(surface);
-
-    wgpuCommandBufferRelease(command);
-
-    wgpuCommandEncoderRelease(encoder);
 
     wgpuQueueRelease(queue);
 
@@ -218,9 +259,9 @@ int main (int /* argc */, char** /* argv */)
 
     wgpuAdapterRelease(adapter);
 
-    wgpuInstanceRelease(instance);
-
     glfwDestroyWindow(window);
+
+    wgpuInstanceRelease(instance);
 
     return 0;
 }
