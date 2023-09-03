@@ -5,6 +5,13 @@ add_subdirectory(3rdparty/glfw-3.3.8)
 add_subdirectory(3rdparty/dawn)
 add_subdirectory(3rdparty/glfw3webgpu)
 
+# a fix to build dawn:
+# in file:line <build_dir>/_deps/dawn-src/src/tint/resolver/const_eval.cc:2001
+# replace
+#            auto signed_shift_right = [&] {
+# by this
+#            [[maybe_unused]] auto signed_shift_right = [&] {
+
 add_executable(application app.cpp)
 
 target_link_libraries(application PRIVATE glfw webgpu glfw3webgpu)
