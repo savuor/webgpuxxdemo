@@ -99,6 +99,7 @@ int main (int /* argc */, char** /* argv */)
     TerminatorGLFW terminatorGlfw;
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     GLFWwindow* window = glfwCreateWindow(640, 480, "WebGPU C++ Demo", NULL, NULL);
 
     if (!window)
