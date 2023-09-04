@@ -12,7 +12,11 @@
             "args": [ ],
             "stopAtEntry": false,
             "cwd": "${command:cmake.launchTargetDirectory}",
-            "environment": [ ],
+            "environment": [
+                 { "name"  : "VK_ICD_FILENAMES",
+             //      "value" : "/usr/share/vulkan/icd.d/nvidia-icd.json"}
+                   "value" : "/usr/share/vulkan/icd.d/lvp_icd.x86_64.json"}
+             ],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
