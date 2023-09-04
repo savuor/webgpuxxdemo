@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include <GLFW/glfw3.h>
 #include <webgpu/webgpu.h>
@@ -215,6 +217,8 @@ int main (int /* argc */, char** /* argv */)
     wgpuQueueOnSubmittedWorkDone(queue, onQueueWorkDone, nullptr /* pUserData */);
 #endif
 
+    std::cout << "Queue: " << queue << std::endl;
+
     WGPUSwapChainDescriptor swapChainDesc = {};
     swapChainDesc.nextInChain = nullptr;
     swapChainDesc.width = 640;
@@ -263,7 +267,7 @@ int main (int /* argc */, char** /* argv */)
         renderPassDesc.timestampWriteCount = 0;
         renderPassDesc.timestampWrites = nullptr;
         renderPassDesc.nextInChain = nullptr;
-        
+
         WGPURenderPassEncoder renderPass = wgpuCommandEncoderBeginRenderPass(encoder, &renderPassDesc);
         wgpuRenderPassEncoderEnd(renderPass);
 
