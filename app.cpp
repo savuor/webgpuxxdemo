@@ -90,6 +90,14 @@ WGPUDevice requestDevice(WGPUAdapter adapter, WGPUDeviceDescriptor const * descr
 
 int main (int /* argc */, char** /* argv */)
 {
+#ifdef WEBGPU_BACKEND_DAWN
+    const std::string backendName = "Dawn";
+#elif defined(WEBGPU_BACKEND_WGPU)
+    const std::string backendName = "WGPU-Native";
+#endif
+
+    std::cout << "Running with " << backendName << " backend" << std::endl;
+
     WGPUInstanceDescriptor desc = {};
     desc.nextInChain = nullptr;
     WGPUInstance instance = wgpuCreateInstance(&desc);
@@ -213,7 +221,6 @@ int main (int /* argc */, char** /* argv */)
 
 #ifdef WEBGPU_BACKEND_DAWN
     wgpuDeviceSetDeviceLostCallback(device, onDeviceLost, nullptr /*pUserData*/ );
-#endif
 
     auto onDeviceLog = [](WGPULoggingType type, char const * message, void * /* userdata */)
     {
@@ -242,6 +249,7 @@ int main (int /* argc */, char** /* argv */)
     };
 
     wgpuDeviceSetLoggingCallback(device, onDeviceLog, nullptr /* pUserData*/);
+#endif
 
     std::vector<WGPUFeatureName> deviceFeatures;
     int nDeviceFeatures = wgpuDeviceEnumerateFeatures(device, nullptr);
@@ -286,6 +294,7 @@ int main (int /* argc */, char** /* argv */)
     WGPUSwapChain swapChain = wgpuDeviceCreateSwapChain(device, surface, &swapChainDesc);
     std::cout << "Swapchain: " << swapChain << std::endl;
 
+    std::cout << "Running frame loop..." << std::endl;
     while (!glfwWindowShouldClose(window))
     {
         // Check whether the user clicked on the close button (and any other
@@ -293,7 +302,7 @@ int main (int /* argc */, char** /* argv */)
         glfwPollEvents();
 
         WGPUTextureView nextTexture = wgpuSwapChainGetCurrentTextureView(swapChain);
-        std::cout << "nextTexture: " << nextTexture << std::endl;
+
         if (!nextTexture)
         {
             std::cerr << "Cannot acquire next swap chain texture" << std::endl;

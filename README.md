@@ -10,7 +10,10 @@ Based on this tutorial: https://eliemichel.github.io/LearnWebGPU/index.html
 
 # How to run
 On my machine there is an integrated Radeon card (AMD Ryzen 7) and a discrete nVidia RTX.
-At first it tried to run on Radeon, skips 3 frames and freezes (Dawn) or dies with surface timeout error.
+At first it tried to run on Radeon, skips 3 frames and freezes (Dawn) or dies with surface timeout error (wgpu-native).
+* Dawn:
 Switching to LVP ICD helped: added env variable at startup:
 `VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json`
 By some reason setting nVidia ICD results to no devices found.
+* wgpu-native: does not work still
+Both LVP and nVidia ICD fail at swap chain creation: `Surface does not support the adapter's queue family`
