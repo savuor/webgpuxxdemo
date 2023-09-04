@@ -214,6 +214,35 @@ int main (int /* argc */, char** /* argv */)
 #ifdef WEBGPU_BACKEND_DAWN
     wgpuDeviceSetDeviceLostCallback(device, onDeviceLost, nullptr /*pUserData*/ );
 #endif
+
+    auto onDeviceLog = [](WGPULoggingType type, char const * message, void * /* userdata */)
+    {
+        std::cout << "Device log: type ";
+        if (type < 4)
+        {
+            const std::map<int, std::string> logTypeNames =
+            {
+                { 0, "Verbose"},
+                { 1, "Info"},
+                { 2, "Warning"},
+                { 3, "Error"},
+            };
+            std::cout << logTypeNames.at(type);
+        }
+        else
+        {
+            std::cout << type;
+        }
+
+        if (message)
+        {
+            std::cout << " (" << message << ")";
+        }
+        std::cout << std::endl;
+    };
+
+    wgpuDeviceSetLoggingCallback(device, onDeviceLog, nullptr /* pUserData*/);
+
     std::vector<WGPUFeatureName> deviceFeatures;
     int nDeviceFeatures = wgpuDeviceEnumerateFeatures(device, nullptr);
     deviceFeatures.resize(nDeviceFeatures);
