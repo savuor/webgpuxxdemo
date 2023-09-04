@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <map>
 #include <chrono>
 #include <thread>
 
@@ -126,38 +127,48 @@ int main (int /* argc */, char** /* argv */)
 
     std::cout << "WGPU adapter: " << adapter << std::endl;
 
-    std::vector<WGPUFeatureName> features;
+    const std::map<int, std::string> featuresNames =
+        {
+            {         0, "Undefined"},
+            {         1, "DepthClipControl"},
+            {         2, "Depth32FloatStencil8"},
+            {         3, "TimestampQuery"},
+            {         4, "PipelineStatisticsQuery"},
+            {         5, "TextureCompressionBC"},
+            {         6, "TextureCompressionETC2"},
+            {         7, "TextureCompressionASTC"},
+            {         8, "IndirectFirstInstance"},
+            {         9, "ShaderF16"},
+            {        10, "RG11B10UfloatRenderable"},
+            {        11, "BGRA8UnormStorage"},
+            {        12, "Float32Filterable"},
 
+            {0x000003E9, "DawnShaderFloat16"},
+            {0x000003EA, "DawnInternalUsages"},
+            {0x000003EB, "DawnMultiPlanarFormats"},
+            {0x000003EC, "DawnNative"},
+            {0x000003ED, "ChromiumExperimentalDp4a"},
+            {0x000003EE, "TimestampQueryInsidePasses"},
+            {0x000003EF, "ImplicitDeviceSynchronization"},
+            {0x000003F0, "SurfaceCapabilities"},
+            {0x000003F1, "TransientAttachments"},
+            {0x000003F2, "MSAARenderToSingleSampled"},
+
+            {0x7FFFFFFF, "Force32"},
+        };
+
+    std::vector<WGPUFeatureName> features;
     // First call for a size, second call for actual features list
     size_t featureCount = wgpuAdapterEnumerateFeatures(adapter, nullptr);
     features.resize(featureCount);
     wgpuAdapterEnumerateFeatures(adapter, features.data());
 
-    const std::vector<std::string> featuresNames =
-        {
-            "Undefined", // 0
-            "DepthClipControl",
-            "Depth32FloatStencil8",
-            "TimestampQuery",
-            "PipelineStatisticsQuery",
-            "TextureCompressionBC",
-            "TextureCompressionETC2",
-            "TextureCompressionASTC",
-            "IndirectFirstInstance",
-            "ShaderF16",
-            "RG11B10UfloatRenderable",
-            "BGRA8UnormStorage",
-            "Float32Filterable", // 12
-        };
-
     std::cout << "Adapter features:" << std::endl;
     for (const auto& f : features)
     {
         std::string fs;
-        if (f == 0x7FFFFFFF)
-            fs = "Force32";
-        else if (f >= 0 && f < 13)
-            fs = featuresNames[f];
+        if (featuresNames.count(f))
+            fs = featuresNames.at(f);
         else
             fs = std::to_string(f);
 
@@ -203,6 +214,22 @@ int main (int /* argc */, char** /* argv */)
 #ifdef WEBGPU_BACKEND_DAWN
     wgpuDeviceSetDeviceLostCallback(device, onDeviceLost, nullptr /*pUserData*/ );
 #endif
+    std::vector<WGPUFeatureName> deviceFeatures;
+    int nDeviceFeatures = wgpuDeviceEnumerateFeatures(device, nullptr);
+    deviceFeatures.resize(nDeviceFeatures);
+    wgpuDeviceEnumerateFeatures(device, deviceFeatures.data());
+
+    std::cout << "Adapter features:" << std::endl;
+    for (const auto& f : features)
+    {
+        std::string fs;
+        if (featuresNames.count(f))
+            fs = featuresNames.at(f);
+        else
+            fs = std::to_string(f);
+
+        std::cout << " - " << fs << std::endl;
+    }
 
     WGPUQueue queue = wgpuDeviceGetQueue(device);
 
