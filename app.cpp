@@ -131,10 +131,35 @@ int main (int /* argc */, char** /* argv */)
     features.resize(featureCount);
     wgpuAdapterEnumerateFeatures(adapter, features.data());
 
+    const std::vector<std::string> featuresNames =
+        {
+            "Undefined", // 0
+            "DepthClipControl",
+            "Depth32FloatStencil8",
+            "TimestampQuery",
+            "PipelineStatisticsQuery",
+            "TextureCompressionBC",
+            "TextureCompressionETC2",
+            "TextureCompressionASTC",
+            "IndirectFirstInstance",
+            "ShaderF16",
+            "RG11B10UfloatRenderable",
+            "BGRA8UnormStorage",
+            "Float32Filterable", // 12
+        };
+
     std::cout << "Adapter features:" << std::endl;
     for (const auto& f : features)
     {
-        std::cout << " - " << f << std::endl;
+        std::string fs;
+        if (f == 0x7FFFFFFF)
+            fs = "Force32";
+        else if (f >= 0 && f < 13)
+            fs = featuresNames[f];
+        else
+            fs = std::to_string(f);
+
+        std::cout << " - " << fs << std::endl;
     }
 
     auto onDeviceLost = [](WGPUDeviceLostReason reason, char const * message, void * /*userdata*/)
