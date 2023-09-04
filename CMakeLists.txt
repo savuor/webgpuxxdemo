@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0...3.25)
 project( WebGpuDemo VERSION 0.1.0 LANGUAGES CXX C )
 
 add_subdirectory(3rdparty/glfw-3.3.8)
-add_subdirectory(3rdparty/dawn)
+add_subdirectory(3rdparty/webgpu-distribution)
 add_subdirectory(3rdparty/glfw3webgpu)
 
 # a fix to build dawn:
@@ -31,3 +31,5 @@ if(XCODE)
         XCODE_GENERATE_SCHEME ON
         XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE "Metal")
 endif()
+
+target_copy_webgpu_binaries(application)

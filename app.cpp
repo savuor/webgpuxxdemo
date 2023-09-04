@@ -5,9 +5,6 @@
 #include <webgpu/webgpu.h>
 #include <glfw3webgpu.h>
 
-// redefined, commenting it out
-//#define WEBGPU_BACKEND_DAWN
-
 struct TerminatorGLFW
 {
     ~TerminatorGLFW()
@@ -162,6 +159,7 @@ int main (int /* argc */, char** /* argv */)
     };
     wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
 
+#ifdef WEBGPU_BACKEND_DAWN
     auto onDeviceLost = [](WGPUDeviceLostReason reason, char const * message, void * /*userdata*/)
     {
         std::cout << "Device is lost: reason " << reason;
@@ -173,6 +171,7 @@ int main (int /* argc */, char** /* argv */)
     };
 
     wgpuDeviceSetDeviceLostCallback(device, onDeviceLost, nullptr /*pUserData*/ );
+#endif
 
     WGPUQueue queue = wgpuDeviceGetQueue(device);
 
@@ -180,8 +179,12 @@ int main (int /* argc */, char** /* argv */)
     {
         std::cout << "Queued work finished with status: " << status << std::endl;
     };
-    wgpuQueueOnSubmittedWorkDone(queue, /* signalValue -- no idea what it is */ 0, onQueueWorkDone, nullptr /* pUserData */);
 
+#ifdef WEBGPU_BACKEND_DAWN
+    wgpuQueueOnSubmittedWorkDone(queue, /* signalValue -- no idea what it is */ 0, onQueueWorkDone, nullptr /* pUserData */);
+#elif defined(WEBGPU_BACKEND_WGPU)
+    wgpuQueueOnSubmittedWorkDone(queue, onQueueWorkDone, nullptr /* pUserData */);
+#endif
 
     WGPUSwapChainDescriptor swapChainDesc = {};
     swapChainDesc.nextInChain = nullptr;
