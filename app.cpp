@@ -137,6 +137,16 @@ int main (int /* argc */, char** /* argv */)
         std::cout << " - " << f << std::endl;
     }
 
+    auto onDeviceLost = [](WGPUDeviceLostReason reason, char const * message, void * /*userdata*/)
+    {
+        std::cout << "Device is lost: reason " << reason;
+        if (message)
+        {
+            std::cout << " (" << message << ")";
+        }
+        std::cout << std::endl;
+    };
+
     WGPUDeviceDescriptor deviceDesc = {};
     deviceDesc.nextInChain = nullptr;
     deviceDesc.label = "My Device"; // anything works here, that's your call
@@ -144,6 +154,10 @@ int main (int /* argc */, char** /* argv */)
     deviceDesc.requiredLimits = nullptr; // we do not require any specific limit
     deviceDesc.defaultQueue.nextInChain = nullptr;
     deviceDesc.defaultQueue.label = "The default queue";
+#ifdef WEBGPU_BACKEND_WGPU
+    deviceDesc.deviceLostCallback = onDeviceLost;
+    deviceDesc.deviceLostUserdata = nullptr;
+#endif
     WGPUDevice device = requestDevice(adapter, &deviceDesc);
 
     std::cout << "Got device: " << device << std::endl;
@@ -160,16 +174,6 @@ int main (int /* argc */, char** /* argv */)
     wgpuDeviceSetUncapturedErrorCallback(device, onDeviceError, nullptr /* pUserData */);
 
 #ifdef WEBGPU_BACKEND_DAWN
-    auto onDeviceLost = [](WGPUDeviceLostReason reason, char const * message, void * /*userdata*/)
-    {
-        std::cout << "Device is lost: reason " << reason;
-        if (message)
-        {
-            std::cout << " (" << message << ")";
-        }
-        std::cout << std::endl;
-    };
-
     wgpuDeviceSetDeviceLostCallback(device, onDeviceLost, nullptr /*pUserData*/ );
 #endif
 
