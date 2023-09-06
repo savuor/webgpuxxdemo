@@ -133,6 +133,12 @@ int main (int /* argc */, char** /* argv */)
     WGPURequestAdapterOptions adapterOpts = {};
     WGPUAdapter adapter = requestAdapter(instance, &adapterOpts);
 
+    if (!adapter)
+    {
+        std::cerr << "Could not request an adapter!" << std::endl;
+        return 1;
+    }
+
     std::cout << "WGPU adapter: " << adapter << std::endl;
 
     const std::map<int, std::string> featuresNames =
@@ -295,6 +301,8 @@ int main (int /* argc */, char** /* argv */)
     std::cout << "Swapchain: " << swapChain << std::endl;
 
     std::cout << "Running frame loop..." << std::endl;
+
+    int nFrame = 0;
     while (!glfwWindowShouldClose(window))
     {
         // Check whether the user clicked on the close button (and any other
@@ -308,6 +316,9 @@ int main (int /* argc */, char** /* argv */)
             std::cerr << "Cannot acquire next swap chain texture" << std::endl;
             break;
         }
+
+        // Turn it on if you need it
+        //std::cout << "frame #" << nFrame << std::endl;
 
         WGPUCommandEncoderDescriptor encoderDesc = {};
         encoderDesc.nextInChain = nullptr;
@@ -348,6 +359,8 @@ int main (int /* argc */, char** /* argv */)
         //wgpuCommandEncoderRelease(encoder);
 
         wgpuSwapChainPresent(swapChain);
+
+        nFrame++;
     }
 
     wgpuSwapChainRelease(swapChain);
