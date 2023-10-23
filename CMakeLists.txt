@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.0...3.25)
 project( WebGpuDemo VERSION 0.1.0 LANGUAGES CXX C )
 
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+endif(CCACHE_FOUND)
+
 add_subdirectory(3rdparty/glfw-3.3.8)
 add_subdirectory(3rdparty/webgpu-distribution)
 add_subdirectory(3rdparty/glfw3webgpu)
