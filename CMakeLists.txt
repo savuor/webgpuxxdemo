@@ -19,7 +19,7 @@ add_subdirectory(3rdparty/glfw3webgpu)
 # by this
 #            [[maybe_unused]] auto signed_shift_right = [&] {
 
-add_executable(application app.cpp)
+add_executable(application app.cpp webgpu_cxx_impl.cpp)
 
 target_link_libraries(application PRIVATE glfw webgpu glfw3webgpu)
 
